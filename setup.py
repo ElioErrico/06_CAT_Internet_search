@@ -17,10 +17,9 @@ def run_crawl4ai_setup():
         log.error("Error during Crawl4AI setup:", e)
         return "Error during Crawl4AI setup."
 
-@hook(priority=10)
-def agent_fast_reply(fast_reply: Dict, cat: StrayCat) -> Dict:
+@hook
+def fast_reply(fast_reply: Dict, cat: StrayCat) -> Dict:
     user_message: str = cat.working_memory.user_message_json.text
-
     if user_message == "@setup crawl4ai-setup":
         result = run_crawl4ai_setup()
         fast_reply["output"] = result

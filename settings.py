@@ -7,5 +7,9 @@ class MySettings(BaseModel):
     tool_name: str = "Internet Search"
 
 @plugin
-def settings_schema():
-    return MySettings.schema()
+def settings_model():
+    """
+    Restituisce il modello Pydantic delle impostazioni.
+    Il framework usa questo per validare e salvare i settings.
+    """
+    return MySettings
