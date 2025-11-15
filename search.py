@@ -14,6 +14,41 @@ from .helpers import (
     ddg_search_structured,
 )
 
+
+@hook  # default priority = 1 
+def before_cat_reads_message(user_message_json, cat):
+    """
+    Hook che aggiunge un prompt di pianificazione a tutti i messaggi quando il tool è abilitato.
+    Questo garantisce che la prima azione dell'agente sia sempre la pianificazione.
+    """
+    settings = cat.mad_hatter.get_plugin().load_settings()
+    tool_key = settings["tool_name"]    
+    
+    # ---- Guard: abilita/disabilita tool per utente; fallback=False ----
+    try:
+        with open("cat/static/tools_status.json", "r", encoding="utf-8") as f:
+            ts = json.load(f) or {}
+    except Exception:
+        ts = {}
+
+    uid = str(getattr(cat, "user_id", "") or "")
+    enabled = bool(
+        ts.get("tools", {})
+          .get(tool_key, {})
+          .get("user_id_tool_status", {})
+          .get(uid, False)
+    )
+    cat.send_ws_message(f"Tool {tool_key} enabled for user {uid}","chat")
+    if not enabled:
+        cat.send_ws_message(f"Tool {tool_key} not enabled for user {uid}","chat")
+        return user_message_json
+
+    # Prompt di pianificazione che verrà aggiunto a tutte le richieste
+    planning_phase_prompt = """\n - Se necessario ai fini della tua richiesta utilizza il tool duck_duck_go_search per cercare informazioni online e una volta ottenuto il link utilizza il tool crawl_site_content per leggere il contenuto di un sito web."""
+
+    user_message_json["text"] = user_message_json["text"] + planning_phase_prompt
+    return user_message_json
+
 @tool (return_direct=False)
 def duck_duck_go_search(tool_input: str, cat):
     """
@@ -79,5 +114,6 @@ def crawl_site_content(tool_input: str, cat):
         md = md[:MAX_CHARS].rsplit("\n", 1)[0] + "\n\n…[troncato]"
 
     return md
+
 
 
