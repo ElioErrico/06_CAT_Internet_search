@@ -38,9 +38,9 @@ def before_cat_reads_message(user_message_json, cat):
           .get("user_id_tool_status", {})
           .get(uid, False)
     )
-    cat.send_ws_message(f"Tool {tool_key} enabled for user {uid}","chat")
+    # cat.send_ws_message(f"Tool {tool_key} enabled for user {uid}","chat")
     if not enabled:
-        cat.send_ws_message(f"Tool {tool_key} not enabled for user {uid}","chat")
+        # cat.send_ws_message(f"Tool {tool_key} not enabled for user {uid}","chat")
         return user_message_json
 
     # Prompt di pianificazione che verrà aggiunto a tutte le richieste
@@ -114,6 +114,7 @@ def crawl_site_content(tool_input: str, cat):
         md = md[:MAX_CHARS].rsplit("\n", 1)[0] + "\n\n…[troncato]"
 
     return md
+
 
 
 
